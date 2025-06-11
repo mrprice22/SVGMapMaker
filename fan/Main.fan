@@ -16,19 +16,13 @@ class Main
    Window{
     size=startWindowSize
     title="SVG Map Maker"
-    content = EdgePane{
-      center = SashPane{
-        //weights = [1,3]
-        LandmarkEditor,
-        Label{text = "right"},
-      }
+    content = EdgePane{center = SashPane{LandmarkEditor, Label{text = "right"},}
     }
    }.open 
   }
 
   Widget LandmarkEditor(){
     //CSV Tab
-    csvButtons := InsetPane{Label{text="example1"},Button{text="example2"}}
     csvText := Text
     {
       multiLine = true
@@ -45,7 +39,22 @@ class Main
         "Iceland/NetherKeep, 454, 74, -2768, blue, diamond\n"+
         "CooCoo Land, -790, 43, -1959, orange, circle\n"
     }
+    
+     ProcessLandmarks := |Str csv|{
+      landmarks := Landmark[,]
+        lines := csv.splitLines
+        echo("${lines->size} lines found")
+       // return landmarks
+    }
+    
+    csvButtons := InsetPane{Button{text="Convert to Data Model";onAction.add {ProcessLandmarks(csvText.text)}},}
     csv := Tab{text=".CSV"; EdgePane{top=csvButtons;center=csvText},}
+   
+    //Data Model tab
+    //Convert to data model records
+    //landmarks := Landmark[]
+    
+
     //SVG Tab
     svgButtons :=InsetPane{Label{text="example3"},Button{text="example4"}}
     svgText := Text
@@ -59,4 +68,7 @@ class Main
     return TabPane{csv,svg}
     
   }
+
+
+  
 }
