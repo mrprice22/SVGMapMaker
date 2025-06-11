@@ -40,11 +40,16 @@ class Main
         "CooCoo Land, -790, 43, -1959, orange, circle\n"
     }
     
-     ProcessLandmarks := |Str csv|{
+     ProcessLandmarks := |Str csv -> Landmark[]|{
       landmarks := Landmark[,]
-        lines := csv.splitLines
-        echo("${lines->size} lines found")
-       // return landmarks
+      lines := csv.splitLines
+      echo("${lines->size} lines found")
+      lines.each |line|{
+        lm := Landmark.fromStr(line)
+        if(lm != null)
+          landmarks.add(lm)
+      }
+      return landmarks
     }
     
     csvButtons := InsetPane{Button{text="Convert to Data Model";onAction.add {ProcessLandmarks(csvText.text)}},}
