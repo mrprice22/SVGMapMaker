@@ -3,6 +3,7 @@ using gfx
 @Js
 class Main
 {
+  Landmark[] landmarks := Landmark[,]
   static const Size startWindowSize:=Size(800,600)
   static Void main()
   {
@@ -23,6 +24,19 @@ class Main
 
   Widget LandmarkEditor(){
     //CSV Tab
+    
+
+     ProcessLandmarks := |Str csv|{
+      landmarks.clear
+      lines := csv.splitLines
+      echo("${lines->size} lines found")
+      lines.each |line|{
+        lm := Landmark.fromStr(line)
+        if(lm != null)
+          landmarks.add(lm)
+      }
+      
+    }
     csvText := Text
     {
       multiLine = true
@@ -40,25 +54,22 @@ class Main
         "CooCoo Land, -790, 43, -1959, orange, circle\n"
     }
     
-     ProcessLandmarks := |Str csv -> Landmark[]|{
-      landmarks := Landmark[,]
-      lines := csv.splitLines
-      echo("${lines->size} lines found")
-      lines.each |line|{
-        lm := Landmark.fromStr(line)
-        if(lm != null)
-          landmarks.add(lm)
-      }
-      return landmarks
-    }
-    
     csvButtons := InsetPane{Button{text="Convert to Data Model";onAction.add {ProcessLandmarks(csvText.text)}},}
-    csv := Tab{text=".CSV"; EdgePane{top=csvButtons;center=csvText},}
+    csvTab := Tab{text=".CSV"; EdgePane{top=csvButtons;center=csvText},}
    
-    //Data Model tab
-    //Convert to data model records
-    //landmarks := Landmark[]
-    
+    //Table (Data Model)/validation tab
+     table := Table
+    {
+      multi = true
+      model = LandmarkTableModel {it.landmarks = this.landmarks}
+      onAction.add |e| { echo(e) }
+      onSelect.add |e| { echo(e); echo("selected=${e->widget->selected}") }
+      //onPopup.add |e|  { echo(e); e.popup = makePopup }
+      // onMouseMove.add |e| { Int? row := e->widget->rowAt(e.pos); Int? col := e->widget->colAt(e.pos); echo("Row: $row Col: $col " + ((row != null && col != null) ? e->widget->model->text(col, row) : "")) }
+      // hbar.onModify.add |e| { onScroll("Tree.hbar", e) }
+      // vbar.onModify.add |e| { onScroll("Tree.vbar", e) }
+    }
+    tableTab := Tab{text="Table"}
 
     //SVG Tab
     svgButtons :=InsetPane{Label{text="example3"},Button{text="example4"}}
@@ -68,9 +79,9 @@ class Main
       font = Desktop.sysFontMonospace
       text =""
     }
-    svg := Tab{text=".SVG"; EdgePane{top=svgButtons;center=svgText},}
+    svgTab := Tab{text=".SVG"; EdgePane{top=svgButtons;center=svgText},}
     //Tab Pane
-    return TabPane{csv,svg}
+    return TabPane{csvTab,svgTab}
     
   }
 
