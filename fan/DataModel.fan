@@ -1,6 +1,13 @@
 using gfx
 using fwt
 
+enum class Shape{
+  circle,
+  square,
+  diamond,
+  triangle
+}
+
 class Landmark{
     Str name
     Int x
@@ -8,16 +15,19 @@ class Landmark{
     Int z
     Color color
     Str? notes
-    Str? shape
-    new make(Str name, Int x, Int y, Int z, Color c){
+    Shape shape
+    static const Int expectedParams := 6
+    new make(Str name, Int x, Int y, Int z, Color c, Shape shape){
       this.name = name
       this.x = x
       this.y = y
       this.z = z
       this.color = c
+      this.shape = shape
       echo ("created landmark ${name} @ (${x},${y},${z}): ${color}")
     }
 
+   
     static Landmark? fromStr(Str csvLine){
       //Format: Name, X, Y, Z, Color, Shape
       params := csvLine.split(',')
@@ -31,7 +41,7 @@ class Landmark{
         //Ignore comments
         echo ("Skipping Row becuase commented out with # char")
         return null
-      } else if (size < 6){
+      } else if (size < expectedParams){
         //Skip if missing expected numbar of params
         echo("unexpected number of params for input line: ${csvLine}")
         return null
@@ -42,17 +52,17 @@ class Landmark{
         Int x := Int.fromStr(params[1])
         Int y := Int.fromStr(params[2])
         Int z := Int.fromStr(params[3])
-        color := Color.black
-        Str shape := params[5]
-        return Landmark.make(name,x,y,z,color)  
+        Color? c 
+        try{c= Color(params[4])}catch{c= Color.black; echo("Unable to convert '${params[4]}' to a color, defaulting to black")}
+        shape :=  Shape.fromStr(params[5], true) ?: Shape.circle
+        return Landmark.make(name,x,y,z,c, shape)  
         }
         catch (Err e){
+          echo (e.toStr)
           echo ("Parse Err: Skipping landmark ${csvLine}")
           return null
-        }
-        
-      }
-   
+        } 
+      }  
     }
   }
 
@@ -77,7 +87,7 @@ class Landmark{
       case 2:  return f.y.toStr
       case 3:  return f.z.toStr
       case 4:  return f.color.toStr
-      case 5:   return f.shape
+      case 5:  return f.shape.toStr
       default: return "?"
     }
   }
