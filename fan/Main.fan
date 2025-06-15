@@ -4,7 +4,7 @@ using gfx
 class Main
 {
   Landmark[] landmarks := Landmark[,]
-  static const Size startWindowSize:=Size(800,600)
+  static const Size startWindowSize:=Size(1400,900)
   static Void main()
   {
     //dirs() 
@@ -16,16 +16,18 @@ class Main
   Void start()
   {
     svgFile := File("file:///C:/Users/homel/OneDrive/Documents/SVGMapMaker/PriceRealm/overworld.svg".toUri)
+    csvFile := File("file:///C:/Users/homel/OneDrive/Documents/SVGMapMaker/PriceRealm/landmarks.txt".toUri) 
     browser := WebBrowser.make
     browser.load("file:///C:/Users/homel/OneDrive/Documents/SVGMapMaker/PriceRealm/index.html".toUri)
-    Window{
+    Window window := Window{
     size=startWindowSize
     title="SVG Map Maker"
-    content = EdgePane{center = SashPane{LandmarkEditor(browser, svgFile),EdgePane{center=browser},}}
+    content = EdgePane{center = SashPane{weights=[1,2];LandmarkEditor(browser, svgFile, csvFile),EdgePane{center=browser},}}
    }.open 
+   
   }
 
-  Widget LandmarkEditor(WebBrowser browser, File svgFile){
+  Widget LandmarkEditor(WebBrowser browser, File svgFile, File csvFile){
     renderer := MapRenderer.make 
     //## SVG Tab
     svgButtons :=InsetPane{Label{text="example3"},Button{text="example4"}}
@@ -60,8 +62,6 @@ class Main
       // vbar.onModify.add |e| { onScroll("Tree.vbar", e) }
     }
 
-   
-
     updateTable := |Landmark[] marks| {
       table.model->landmarks = marks
       UpdateSVGText(marks)
@@ -72,6 +72,7 @@ class Main
     tableTab := Tab{text="Table"; InsetPane{table,},}
 
     //## CSV Tab
+    //Event when button is clicked to process csv landmarks
      ProcessLandmarks := |Str csv|  {
       landmarks.clear
       lines := csv.splitLines
@@ -82,26 +83,12 @@ class Main
           landmarks.add(lm)
       }
       updateTable(landmarks)
+      csvFile.out.printLine(csv).close //save csv to local diskm
     }
     csvText := Text {
       multiLine = true
       font = Desktop.sysFontMonospace
-      text =
-        "# Format: Name, X, Y, Z, color, Shape\n"+
-        "# River's House, 344, 64, 571, #FF00FF, circle\n"+
-        "World Spawn, 267, 66, 547, 	#808080, diamond\n"+
-        "#Nolan's House, 279, 66, 622, #0000FF, circle\n"+
-        "#Gramdma's House, 495, 71, 831, #800080, circle\n"+
-        "Lava Pillar Village, 862, 63, 854, #FF0000, circle\n"+
-        "Water Pillar Village, 1225, 62, 656, #0000FF, circle\n"+
-        "Cat Village, -272, 68,  1902, #8b4513, circle\n"+
-        "Iceland/NetherKeep, 454, 74, -2768, #0000FF, diamond\n"+
-        "CooCoo Land, -790, 43, -1959, #ff7f50, circle\n"+
-        "Safety Zone Mining Camp, -126, 79, 1588, #800080, square\n"+
-        "Haunted Village by Pillage Tower1 (looted), 1768, 71, 2033, #55ff55, circle\n"+
-        "Broken Portal by Pillage Tower2 (looted), 1962, 66, 2726, #55ff55, circle\n"+
-        "Spruce Forest Pillage Tower3, 1831, 64, 3920, #ff0f0f, circle\n"+
-        "Acai Village Pillage Tower4, 1770, 65, 5622,  #ff2f2f, circle\n"
+      text = csvFile.readAllStr
     }
     csvButtons := InsetPane{Button{text="Convert to Data Model";onAction.add {ProcessLandmarks(csvText.text)}},}
     csvTab := Tab{text=".CSV"; EdgePane{top=csvButtons;center=csvText},}
