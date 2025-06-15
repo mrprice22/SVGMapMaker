@@ -6,7 +6,7 @@ class Build : build::BuildPod
   {
     podName = "SVGMapMaker"
     summary = "Make simple maps from a list of landmarks using SVG"
-    depends = ["sys 1.0", "fwt 1.0","gfx 1.0", "concurrent 1.0"]
+    depends = ["sys 1.0.79+", "fwt 1.0.79+","gfx 1.0.79+", "concurrent 1.0.79+"]
     srcDirs = [`fan/`]
   }
 
