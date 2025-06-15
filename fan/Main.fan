@@ -15,15 +15,18 @@ class Main
 
   Void start()
   {
+    svgFile := File("file:///C:/Users/homel/OneDrive/Documents/SVGMapMaker/PriceRealm/overworld.svg".toUri)
     browser := WebBrowser.make
+    browser.load("file:///C:/Users/homel/OneDrive/Documents/SVGMapMaker/PriceRealm/index.html".toUri)
     Window{
     size=startWindowSize
     title="SVG Map Maker"
-    content = EdgePane{center = SashPane{LandmarkEditor(browser),EdgePane{center=browser},}}
+    content = EdgePane{center = SashPane{LandmarkEditor(browser, svgFile),EdgePane{center=browser},}}
    }.open 
   }
 
-  Widget LandmarkEditor(WebBrowser browser){
+  Widget LandmarkEditor(WebBrowser browser, File svgFile){
+    renderer := MapRenderer.make 
     //## SVG Tab
     svgButtons :=InsetPane{Label{text="example3"},Button{text="example4"}}
     svgText := Text{
@@ -31,9 +34,17 @@ class Main
       font = Desktop.sysFontMonospace
       text =""
     }
+
+    //Conversion GO Time
     UpdateSVGText := |Landmark[] marks|{
-      renderer := MapRenderer.make 
-      svgText->text = renderer.renderSvg(marks)
+      //Encode SVG
+      Str svgEncoded := renderer.renderSvg(marks)
+      //Update text widget to display encoded svg
+      svgText->text = svgEncoded
+      //Also write encouded svg to file
+      svgFile.out.printLine(svgEncoded).close
+      //and refresh web browser
+      browser.refresh
     }
     svgTab := Tab{text=".SVG"; EdgePane{top=svgButtons;center=svgText},}
 
