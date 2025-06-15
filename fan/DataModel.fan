@@ -126,34 +126,36 @@ class MapRenderer{
         svg.add("<svg xmlns='http://www.w3.org/2000/svg' width='${width}' height='${height}'>\n")
         landmarks.each |l| {
           Int x := ((l.x.toFloat - minX) * zoom + padding).toInt
-          Int y := (height.toFloat - ((l.z.toFloat - minZ) * zoom + padding)).toInt
+          //Original +Z -> +Y mapping:
+          //Int y := ((maxZ - l.z.toFloat) * zoom + padding).toInt
+          //Inverted +Z -> -Y Mapping:
+          Int y := ((l.z.toFloat - minZ) * zoom + padding).toInt
+
           Str shape := l.shape.name
           Str color := l.color.toStr
           Str safeName := l.name
           switch (shape) {
-    case "square":
-        svg.add("<rect x='${x - 5}' y='${y - 5}' width='10' height='10' fill='${color}'>")
-           .add("<title>${safeName} (X=${l.x}, Y=${l.y}, Z=${l.z})</title>")
-           .add("</rect>\n")
-    case "triangle":
-        svg.add("<polygon points='${x},${y - 6} ${x - 6},${y + 5} ${x + 6},${y + 5}' fill='${color}'>")
-           .add("<title>${safeName} (X=${l.x}, Y=${l.y}, Z=${l.z})</title>")
-           .add("</polygon>\n")
-    case "diamond":
-        svg.add("<polygon points='${x},${y - 6} ${x - 6},${y} ${x},${y + 6} ${x + 6},${y}' fill='${color}'>")
-           .add("<title>${safeName} (X=${l.x}, Y=${l.y}, Z=${l.z})</title>")
-           .add("</polygon>\n")
-    default:
-        svg.add("<circle cx='${x}' cy='${y}' r='6' fill='${color}'>")
-           .add("<title>${safeName} (X=${l.x}, Y=${l.y}, Z=${l.z})</title>")
-           .add("</circle>\n")
-}
-
-svg.add("<text x='${x + 8}' y='${y + 4}' font-size='12' fill='black'>${safeName}</text>\n")
+            case "square":
+                svg.add("<rect x='${x - 5}' y='${y - 5}' width='10' height='10' fill='${color}'>")
+                  .add("<title>${safeName} (X=${l.x}, Y=${l.y}, Z=${l.z})</title>")
+                  .add("</rect>\n")
+            case "triangle":
+                svg.add("<polygon points='${x},${y - 6} ${x - 6},${y + 5} ${x + 6},${y + 5}' fill='${color}'>")
+                  .add("<title>${safeName} (X=${l.x}, Y=${l.y}, Z=${l.z})</title>")
+                  .add("</polygon>\n")
+            case "diamond":
+                svg.add("<polygon points='${x},${y - 6} ${x - 6},${y} ${x},${y + 6} ${x + 6},${y}' fill='${color}'>")
+                  .add("<title>${safeName} (X=${l.x}, Y=${l.y}, Z=${l.z})</title>")
+                  .add("</polygon>\n")
+            default:
+                svg.add("<circle cx='${x}' cy='${y}' r='6' fill='${color}'>")
+                  .add("<title>${safeName} (X=${l.x}, Y=${l.y}, Z=${l.z})</title>")
+                  .add("</circle>\n")
+          }
+        svg.add("<text x='${x + 8}' y='${y + 4}' font-size='12' fill='black'>${safeName}</text>\n")
         }
-
-        svg.add("</svg>\n")
-        return svg.toStr
+      svg.add("</svg>\n")
+      return svg.toStr
     }
 
     private Void calculateZoom(Landmark[] landmarks) {
